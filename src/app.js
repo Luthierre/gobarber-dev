@@ -1,16 +1,25 @@
 /* eslint-disable linebreak-style */
 import path from 'path';
 import express from 'express';
+import Youch from 'youch';
+import * as Sentry from '@sentry/node';
+import 'express-async-errors';
+
 import routes from './routes';
+import sentryConfig from './config/sentry';
 import './database'
 
 
-// eslint-disable-next-line linebreak-style
+
 class App {
   constructor() {
     this.server = express();
+    Sentry.init(sentryConfig);
+
     this.middlewares();
     this.routes();
+    this.exceptionHandler();
+
   }
 
   middlewares() {
@@ -28,7 +37,14 @@ class App {
   }
 
   routes() {
+    this.server.use(Sentry.Handlers.requestHandler());
     this.server.use(routes);
+  }
+  exceptionHandler() {
+    this.server.use(async (err, req, res, next) => {
+      const errors = await new Youch(err, req).toJSON();
+      return res.status(500).json(errors);
+    });
   }
 }
 export default new App().server;
