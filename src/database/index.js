@@ -6,6 +6,8 @@ import File from '../app/models/File';
 import Appointment from '../app/models/Appointment';
 
 const models = [User, File, Appointment];
+
+
 class Database {
   constructor(){
     this.init();
@@ -19,7 +21,7 @@ class Database {
     .map(model => model.associate && model.associate(this.connection.models));
   }
   mongo(){
-    this.mongoConnection = mongoose.connect('mongodb://localhost:27017/gobarber',
+    this.mongoConnection = mongoose.connect(process.env.MONGO_URL,
       { 
         useNewUrlParser: true,
         useFindAndModify: false,

@@ -1,10 +1,10 @@
 /* eslint-disable linebreak-style */
+import 'dotenv/config';
 import path from 'path';
 import express from 'express';
 import Youch from 'youch';
 import * as Sentry from '@sentry/node';
 import 'express-async-errors';
-
 import routes from './routes';
 import sentryConfig from './config/sentry';
 import './database'
@@ -42,8 +42,11 @@ class App {
   }
   exceptionHandler() {
     this.server.use(async (err, req, res, next) => {
-      const errors = await new Youch(err, req).toJSON();
-      return res.status(500).json(errors);
+      if(process.env.NODE_ENV){
+        const errors = await new Youch(err, req).toJSON();
+        return res.status(500).json(errors);
+      }
+      return res.status(500).json({error: 'Internal sever error'}); 
     });
   }
 }
