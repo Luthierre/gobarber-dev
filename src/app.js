@@ -1,6 +1,7 @@
 /* eslint-disable linebreak-style */
 import 'dotenv/config';
 import path from 'path';
+import cors from 'cors';
 import express from 'express';
 import Youch from 'youch';
 import * as Sentry from '@sentry/node';
@@ -23,6 +24,8 @@ class App {
   }
 
   middlewares() {
+    this.server.use(Sentry.Handlers.requestHandler());
+    this.server.use(cors());
     this.server.use(express.json());
     this.server.use('/files',
       express.static(
@@ -37,8 +40,8 @@ class App {
   }
 
   routes() {
-    this.server.use(Sentry.Handlers.requestHandler());
     this.server.use(routes);
+    this.server.use(Sentry.Handlers.requestHandler());
   }
   exceptionHandler() {
     this.server.use(async (err, req, res, next) => {
@@ -46,7 +49,7 @@ class App {
         const errors = await new Youch(err, req).toJSON();
         return res.status(500).json(errors);
       }
-      return res.status(500).json({error: 'Internal sever error'}); 
+      return res.status(500).json({error: 'Internal sever error'});
     });
   }
 }

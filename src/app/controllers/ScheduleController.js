@@ -17,6 +17,7 @@ class ScheduleController {
             return res.status(401).json({ error: 'User is not a providers.' });
           }
           const parsedDate = parseISO(date);
+
         const appointments = await Appointment.findAll({
           where: {
             provider_id: req.userId,
@@ -27,8 +28,15 @@ class ScheduleController {
                  ]
              } ,
           },
+          include: [
+            {
+              model: User,
+              as: 'user',
+              attributes: ['name'],
+            }
+          ],
           order: ['date'],
-          
+
         });
         return res.json(appointments);
       }
